@@ -4,149 +4,146 @@ import os
 
 # Configuración de página
 st.set_page_config(
-    page_title="INLAND | Diccionario Eólico de Alarmas",
-    page_icon="🌿",
+    page_title="Terminal SCADA | Diccionario de Alarmas INLAND",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
 # -------------------------------------------------------------
-# ESTILOS CSS - ECO-TECH / SCADA AEROGENERADORES
+# ESTILOS VISUALES TIPO TERMINAL SCADA (MODERNO & DARK)
 # -------------------------------------------------------------
 st.markdown("""
 <style>
-    /* Estilos generales */
-    .main {
-        background-color: #0b111e;
+    /* Fondo principal y fuentes */
+    .stApp {
+        background-color: #0b0f19;
+        color: #e2e8f0;
     }
     
-    /* Banner Cabecera */
-    .hero-banner {
-        background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #0f172a 100%);
-        border: 1px solid #10b981;
-        padding: 24px;
-        border-radius: 14px;
-        color: #ffffff;
+    /* Terminal Header */
+    .scada-header {
+        background: linear-gradient(90deg, #091e3a 0%, #0d3b66 50%, #051c2c 100%);
+        border: 1px solid #1e40af;
+        border-radius: 12px;
+        padding: 20px 25px;
         margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+        box-shadow: 0 4px 20px rgba(14, 165, 233, 0.15);
     }
-    .hero-title {
-        font-size: 26px;
-        font-weight: 700;
-        margin-bottom: 6px;
+    .scada-title {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        color: #38bdf8;
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
     }
-    .hero-subtitle {
-        font-size: 14px;
-        color: #a7f3d0;
-        margin: 0;
-    }
-
-    /* Tarjetas KPI */
-    .kpi-container {
-        display: flex;
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-    .kpi-card {
-        background: #131d2e;
-        border: 1px solid #1e293b;
-        border-radius: 10px;
-        padding: 14px 18px;
-        flex: 1;
-        border-left: 4px solid #10b981;
-    }
-    .kpi-card-crit {
-        border-left: 4px solid #ef4444;
-    }
-    .kpi-num {
-        font-size: 24px;
-        font-weight: 700;
-        color: #ffffff;
-    }
-    .kpi-label {
-        font-size: 12px;
+    .scada-subtitle {
+        font-size: 13px;
         color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        margin-top: 4px;
     }
 
-    /* Ficha Técnica de Alarma */
-    .alarm-card {
-        background-color: #111a28;
-        border: 1px solid #1e293b;
-        border-radius: 12px;
-        padding: 22px;
+    /* Tarjeta Principal de la Alarma */
+    .main-alarm-box {
+        background: #111827;
+        border-radius: 14px;
+        border: 1px solid #1f2937;
+        padding: 24px;
         margin-top: 15px;
         margin-bottom: 25px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
-    .alarm-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #1e293b;
-        padding-bottom: 14px;
-        margin-bottom: 16px;
-    }
-    .alarm-code {
-        font-size: 22px;
-        font-weight: 800;
+    .code-badge {
+        font-size: 26px;
+        font-weight: 900;
+        font-family: 'Courier New', monospace;
         color: #38bdf8;
-        background: #0c4a6e;
-        padding: 4px 12px;
-        border-radius: 6px;
+        background: #082f49;
+        border: 1px solid #0284c7;
+        padding: 6px 16px;
+        border-radius: 8px;
         display: inline-block;
     }
-    .badge-stopped {
-        background: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-        border: 1px solid #ef4444;
-        padding: 6px 14px;
-        border-radius: 20px;
+    .alarm-desc-text {
+        font-size: 18px;
         font-weight: 600;
-        font-size: 13px;
-    }
-    .badge-running {
-        background: rgba(16, 185, 129, 0.2);
-        color: #34d399;
-        border: 1px solid #10b981;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 13px;
+        color: #f8fafc;
+        line-height: 1.5;
+        margin-top: 15px;
+        padding: 15px;
+        background: #162032;
+        border-left: 4px solid #38bdf8;
+        border-radius: 6px;
     }
 
-    /* Cajas internas de la ficha */
-    .prop-box {
-        background: #172234;
-        border: 1px solid #24344d;
-        border-radius: 8px;
-        padding: 12px 14px;
-        margin-bottom: 10px;
-    }
-    .prop-title {
-        font-size: 11px;
-        text-transform: uppercase;
-        color: #64748b;
+    /* Badges de Impacto Operativo */
+    .status-trip {
+        background: rgba(220, 38, 38, 0.2);
+        border: 1px solid #ef4444;
+        color: #fca5a5;
+        padding: 8px 18px;
+        border-radius: 30px;
         font-weight: 700;
-        margin-bottom: 4px;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
     }
-    .prop-value {
-        font-size: 14px;
-        color: #e2e8f0;
+    .status-ok {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid #10b981;
+        color: #86efac;
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-weight: 700;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Cajas Modulares de Parámetros */
+    .module-card {
+        background: #131c2e;
+        border: 1px solid #1e293b;
+        border-radius: 10px;
+        padding: 16px;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .module-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+    }
+    .module-code {
+        font-size: 18px;
+        font-weight: 800;
+        color: #f1f5f9;
+        margin: 6px 0;
+    }
+    .module-meaning {
+        font-size: 13px;
         font-weight: 500;
+        color: #cbd5e1;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
-# DICCIONARIOS DE DECODIFICACIÓN TÉCNICA
+# DICCIONARIOS OFICIALES DE DECODIFICACIÓN
 # -------------------------------------------------------------
 RESET_MODE_MAP = {
     "-": "Sin modo de restablecimiento",
-    "A": "Restablecimiento automático de la alarma",
+    "A": "Restablecimiento automático de alarma",
     "M": "Se requiere restablecimiento manual",
     "M(A)": "Restablecimiento manual (Automático por ARS)",
     "ML": "Restablecimiento manual por el operador localmente en el aerogenerador",
@@ -182,263 +179,278 @@ YAW_PROG_MAP = {
 }
 
 # -------------------------------------------------------------
-# DETECCIÓN DINÁMICA DE COLUMNAS (FLEXIBLE AL EXCEL)
+# CARGA Y MAPEO INTELIGENTE DE COLUMNAS (POR CONTENIDO REAL)
 # -------------------------------------------------------------
-def detectar_columna(df, variantes, default_idx=0):
-    columnas_limpias = {str(c).strip().lower(): c for c in df.columns}
-    for variante in variantes:
-        for c_lower, c_original in columnas_limpias.items():
-            if variante in c_lower:
-                return c_original
-    if default_idx < len(df.columns):
-        return df.columns[default_idx]
-    return df.columns[0]
-
 EXCEL_FILENAME = "alarmas_inland.xlsx"
 
 @st.cache_data
-def cargar_datos():
+def cargar_dataset():
     if os.path.exists(EXCEL_FILENAME):
         df = pd.read_excel(EXCEL_FILENAME)
     else:
         df = pd.DataFrame({
-            "FM": ["FM0", "FM1001", "FM2015", "FM3050"],
-            "Description": ["WTG System ok", "Sobrevelocidad de rotor", "Torsión excesiva de cables", "Temperatura generador alta"],
-            "Reset Mode": ["-", "SL", "A", "M"],
-            "Brake-Program": [0, 3, 0, 1],
-            "Yaw-Program": [0, 29, 28, 0],
-            "StatCom": ["Yes", "No", "Yes", "Yes"],
-            "Reduce Availability": ["No", "Yes", "No", "Yes"],
-            "Reset Level": ["-", "Nivel 3", "Operador", "Nivel 2"],
-            "Deactivation Level": ["-", "Nivel 4", "Nivel 2", "Nivel 3"]
+            "FM": ["FM0", "FM50", "FM51", "FM1001"],
+            "Description": [
+                "WTG System ok",
+                "Cadena de seguridad parada de emergencia general",
+                "Cadena de seguridad activada a través del interruptor Bottombox",
+                "Sobrevelocidad en rotor"
+            ],
+            "Reset Mode": ["-", "SL", "ML", "SL"],
+            "Brake-Program": [0, 3, 3, 3],
+            "Yaw-Program": [0, 50, 50, 29],
+            "StatCom": ["Yes", "No", "No", "No"],
+            "Reduce Availability": ["No", "Yes", "Yes", "Yes"],
+            "Reset Level": ["-", "Operador", "Nivel 2", "Nivel 3"],
+            "Deactivation Level": ["-", "Nivel 2", "Nivel 3", "Nivel 4"]
         })
     df.columns = [str(c).strip() for c in df.columns]
     return df
 
-df = cargar_datos()
+df = cargar_dataset()
 
-# Asignar nombres reales de columnas encontrados en el Excel
-COL_ID = detectar_columna(df, ["codigo", "código", "fm", "code", "alarm", "numero", "id"], 0)
-COL_DESC = detectar_columna(df, ["descripcion", "descripción", "description", "message", "texto", "falla"], 1)
-COL_RESET = detectar_columna(df, ["reset mode", "reset_mode", "resetmode", "reset"], 2)
-COL_BRAKE = detectar_columna(df, ["brake-program", "brake_program", "brakeprogram", "brake", "freno"], 3)
-COL_YAW = detectar_columna(df, ["yaw-program", "yaw_program", "yawprogram", "yaw", "orientacion"], 4)
-COL_STATCOM = detectar_columna(df, ["statcom", "stat_com", "reactiva"], 5)
-COL_DISP = detectar_columna(df, ["reduce availability", "reduce_availability", "disponibilidad", "availability"], 6)
-COL_LVL_RESET = detectar_columna(df, ["reset level", "reset_level", "nivel reset"], 7)
-COL_LVL_DEACT = detectar_columna(df, ["deactivation level", "deactivation_level", "nivel desact"], 8)
+# Identificar columnas por contenido para evitar confusiones
+col_id = None
+col_desc = None
+col_reset = None
+col_brake = None
+col_yaw = None
+col_statcom = None
+col_disp = None
+col_lvl_reset = None
+col_lvl_deact = None
+
+for c in df.columns:
+    c_lower = c.lower()
+    
+    # Columna Código / FM
+    if any(k in c_lower for k in ["fm", "codigo", "código", "code", "alarm"]):
+        if col_id is None:
+            col_id = c
+            
+    # Columna Descripción (textos largos)
+    elif any(k in c_lower for k in ["descrip", "message", "mensaje", "texto", "falla"]):
+        if col_desc is None:
+            col_desc = c
+            
+    # Columna Reset Mode
+    elif "reset mode" in c_lower or "modo reset" in c_lower:
+        col_reset = c
+    elif "reset level" in c_lower or "nivel reset" in c_lower:
+        col_lvl_reset = c
+    elif "deactivation" in c_lower or "desactiv" in c_lower:
+        col_lvl_deact = c
+    elif "brake" in c_lower or "freno" in c_lower:
+        col_brake = c
+    elif "yaw" in c_lower or "orienta" in c_lower:
+        col_yaw = c
+    elif "statcom" in c_lower or "reactiv" in c_lower:
+        col_statcom = c
+    elif "availab" in c_lower or "disponib" in c_lower:
+        col_disp = c
+
+# Asignaciones por descarte seguro
+if col_id is None: col_id = df.columns[0]
+if col_desc is None:
+    # Busca la columna con mayor longitud promedio de texto
+    col_desc = max(df.columns, key=lambda col: df[col].astype(str).str.len().mean())
+
+# Crear clave de búsqueda normalizada (ej: '51' o 'FM51' -> '51')
+def limpiar_codigo(val):
+    s = str(val).strip().upper().replace(" ", "")
+    if s.startswith("FM"):
+        return s[2:]
+    return s
+
+df["_CODIGO_KEY"] = df[col_id].apply(limpiar_codigo)
+df["_CODIGO_LABEL"] = df[col_id].astype(str).str.strip()
 
 # -------------------------------------------------------------
-# ENCABEZADO ECO-TECNOLÓGICO
+# CABECERA TERMINAL SCADA
 # -------------------------------------------------------------
 st.markdown("""
-<div class="hero-banner">
-    <div class="hero-title">
-        <span>🌱 DICCIONARIO DE ALARMAS | CENTRALES EÓLICAS - INLAND</span>
+<div class="scada-header">
+    <div class="scada-title">
+        <span>⚡ TERMINAL DE CONSULTA DE ALARMAS | CENTRALES EÓLICAS - INLAND</span>
     </div>
-    <div class="hero-subtitle">
-        Decodificador operativo inteligente de códigos de falla, programas de frenado, orientación y rearme en aerogeneradores.
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# -------------------------------------------------------------
-# BARRA DE BÚSQUEDA Y FILTRO RÁPIDO (CENTRAL Y PROTAGONISTA)
-# -------------------------------------------------------------
-col_busq, col_filtro = st.columns([3, 1])
-
-with col_busq:
-    busqueda = st.text_input(
-        "🔎 Buscador de Alarmas / Fallas:",
-        placeholder="Escribe el código (ej. FM120, 1001) o palabras clave (ej. Rotor, Presión, Yaw, Sensor)...",
-        label_visibility="collapsed"
-    )
-
-with col_filtro:
-    opcion_filtro = st.selectbox(
-        "Impacto:",
-        ["Todas las Alarmas", "⚠️ Solo con Parada (Disponibilidad)", "✅ Solo Informativas / Operativas"],
-        label_visibility="collapsed"
-    )
-
-# Filtrado de DataFrame
-df_filtrado = df.copy()
-
-if busqueda:
-    filtro_texto = df_filtrado.astype(str).apply(
-        lambda row: row.str.contains(busqueda, case=False, na=False)
-    ).any(axis=1)
-    df_filtrado = df_filtrado[filtro_texto]
-
-if opcion_filtro == "⚠️ Solo con Parada (Disponibilidad)":
-    df_filtrado = df_filtrado[df_filtrado[COL_DISP].astype(str).str.strip().str.upper().isin(["YES", "SÍ", "SI"])]
-elif opcion_filtro == "✅ Solo Informativas / Operativas":
-    df_filtrado = df_filtrado[~df_filtrado[COL_DISP].astype(str).str.strip().str.upper().isin(["YES", "SÍ", "SI"])]
-
-# Cálculos para KPIs
-total_base = len(df)
-coincidentes = len(df_filtrado)
-criticas_base = len(df[df[COL_DISP].astype(str).str.strip().str.upper().isin(["YES", "SÍ", "SI"])])
-
-# Render de KPIs
-st.markdown(f"""
-<div class="kpi-container">
-    <div class="kpi-card">
-        <div class="kpi-num">{coincidentes}</div>
-        <div class="kpi-label">Resultados Visibles</div>
-    </div>
-    <div class="kpi-card kpi-card-crit">
-        <div class="kpi-num">{criticas_base}</div>
-        <div class="kpi-label">Alarmas que paran Turbina (Base)</div>
-    </div>
-    <div class="kpi-card">
-        <div class="kpi-num">{total_base}</div>
-        <div class="kpi-label">Total en Catálogo INLAND</div>
+    <div class="scada-subtitle">
+        Buscador directo de ingeniería y operaciones para decodificación inmediata de fallas en aerogeneradores.
     </div>
 </div>
 """, unsafe_allow_html=True)
 
 # -------------------------------------------------------------
-# TABS PRINCIPALES
+# BUSCADOR DIRECTO (INPUT PRINCIPAL)
 # -------------------------------------------------------------
-tab_ficha, tab_catalogo, tab_leyenda = st.tabs([
-    "🎯 Ficha Operativa Interactiva",
-    "📋 Base de Datos Tabular",
-    "📖 Leyenda de Especificaciones"
-])
+c_input, c_select = st.columns([2, 1])
 
-# ------------------ PESTAÑA 1: FICHA AMIGABLE ------------------
-with tab_ficha:
-    if len(df_filtrado) == 0:
-        st.warning("No se encontraron fallas con los términos buscados. Intenta con otra palabra clave.")
+with c_input:
+    codigo_ingresado = st.text_input(
+        "🔎 Ingrese el Código de Falla exacto (ej. 51 o FM51):",
+        value="",
+        placeholder="Escriba aquí el número o código (ej: FM51, 51, 0, 1001)...",
+        help="Escriba el código exacto y presione Enter."
+    )
+
+with c_select:
+    # Selector directo como alternativa rápida ordenada
+    todos_los_codigos = ["-- Seleccionar de la lista --"] + sorted(list(df["_CODIGO_LABEL"].unique()))
+    seleccion_lista = st.selectbox("O elija directamente el código:", todos_los_codigos)
+
+# Determinar qué código consultar
+codigo_a_buscar = ""
+if codigo_ingresado.strip():
+    codigo_a_buscar = limpiar_codigo(codigo_ingresado)
+elif seleccion_lista != "-- Seleccionar de la lista --":
+    codigo_a_buscar = limpiar_codigo(seleccion_lista)
+
+# Botones rápidos de acceso frecuente
+st.markdown("**Accesos Rápidos:**")
+col_chips = st.columns(6)
+chips_ejemplo = ["FM0", "FM50", "FM51", "FM52", "FM100", "FM1001"]
+for i, chip in enumerate(chips_ejemplo):
+    if col_chips[i].button(chip, use_container_width=True):
+        codigo_a_buscar = limpiar_codigo(chip)
+
+st.markdown("---")
+
+# -------------------------------------------------------------
+# RESULTADO DE LA CONSULTA (EXACTA)
+# -------------------------------------------------------------
+if not codigo_a_buscar:
+    st.info("💡 **Listo para consultar:** Ingrese un código en la barra superior o haga clic en un acceso rápido.")
+else:
+    # Búsqueda EXACTA
+    resultado = df[df["_CODIGO_KEY"] == codigo_a_buscar]
+    
+    if len(resultado) == 0:
+        st.error(f"❌ **Código no encontrado:** No existe ninguna alarma con el identificador `{codigo_ingresado}` en el catálogo de INLAND.")
+        st.caption("Verifique si ingresó correctamente el número o elija un código del menú desplegable a la derecha.")
     else:
-        # Selector de alarma estilizado
-        etiquetas = df_filtrado[COL_ID].astype(str) + "  —  " + df_filtrado[COL_DESC].astype(str)
-        seleccion = st.selectbox(
-            "Selecciona la alarma a decodificar:",
-            etiquetas,
-            label_visibility="visible"
-        )
+        # Tomar exactamente el registro encontrado
+        alarma = resultado.iloc[0]
         
-        fila_idx = etiquetas[etiquetas == seleccion].index[0]
-        alarma = df_filtrado.loc[fila_idx]
-
-        # Extraer variables con limpieza
-        val_id = str(alarma[COL_ID]).strip()
-        val_desc = str(alarma[COL_DESC]).strip()
-        val_reset = str(alarma.get(COL_RESET, "-")).strip()
+        # Extracción segura de datos
+        val_id = str(alarma.get(col_id, "N/A")).strip()
+        val_desc = str(alarma.get(col_desc, "Sin descripción disponible")).strip()
         
+        # Reset Mode
+        val_reset = str(alarma.get(col_reset, "-")).strip() if col_reset else "-"
+        desc_reset = RESET_MODE_MAP.get(val_reset, val_reset if val_reset != "nan" else "No especificado")
+        
+        # Brake
+        val_brake = str(alarma.get(col_brake, "-")).strip() if col_brake else "-"
         try:
-            val_brake = int(alarma.get(COL_BRAKE, 0))
+            b_int = int(float(val_brake))
+            desc_brake = BRAKE_PROG_MAP.get(b_int, f"Programa {b_int}")
         except:
-            val_brake = -1
+            desc_brake = val_brake if val_brake != "nan" else "Estándar"
             
+        # Yaw
+        val_yaw = str(alarma.get(col_yaw, "-")).strip() if col_yaw else "-"
         try:
-            val_yaw = int(alarma.get(COL_YAW, 0))
+            y_int = int(float(val_yaw))
+            desc_yaw = YAW_PROG_MAP.get(y_int, f"Programa {y_int}")
         except:
-            val_yaw = -1
+            desc_yaw = val_yaw if val_yaw != "nan" else "Estándar"
             
-        val_disp = str(alarma.get(COL_DISP, "No")).strip().upper() in ["YES", "SÍ", "SI"]
-        val_statcom = str(alarma.get(COL_STATCOM, "No")).strip().upper() in ["YES", "SÍ", "SI"]
-        val_lvl_reset = str(alarma.get(COL_LVL_RESET, "No especificado")).strip()
-        val_lvl_deact = str(alarma.get(COL_LVL_DEACT, "No especificado")).strip()
+        # Disponibilidad
+        val_disp_raw = str(alarma.get(col_disp, "No")).strip().upper() if col_disp else "NO"
+        es_parada = val_disp_raw in ["YES", "SÍ", "SI", "TRUE", "1"]
+        
+        # StatCom
+        val_statcom_raw = str(alarma.get(col_statcom, "No")).strip().upper() if col_statcom else "NO"
+        es_statcom = val_statcom_raw in ["YES", "SÍ", "SI", "TRUE", "1"]
+        
+        # Niveles
+        lvl_reset = str(alarma.get(col_lvl_reset, "No especificado")).strip() if col_lvl_reset else "No especificado"
+        lvl_deact = str(alarma.get(col_lvl_deact, "No especificado")).strip() if col_lvl_deact else "No especificado"
+        
+        # Render del Badge de Estado
+        if es_parada:
+            badge_html = '<div class="status-trip">🛑 PARADA FORZADA — REDUCE DISPONIBILIDAD</div>'
+        else:
+            badge_html = '<div class="status-ok">🟢 TURBINA OPERATIVA — NO AFECTA DISPONIBILIDAD</div>'
 
-        # Decodificaciones
-        desc_reset = RESET_MODE_MAP.get(val_reset, "Modo particular no catalogado")
-        desc_brake = BRAKE_PROG_MAP.get(val_brake, f"Programa estándar / código {val_brake}")
-        desc_yaw = YAW_PROG_MAP.get(val_yaw, f"Programa estándar / código {val_yaw}")
-
-        # Badge de disponibilidad
-        badge_disp = """<span class="badge-stopped">⚠️ PARADA FORZADA (Afecta Disponibilidad)</span>""" if val_disp else """<span class="badge-running">✅ TURBINA OPERATIVA (No reduce disponibilidad)</span>"""
-
-        # RENDER DE LA FICHA
+        # FICHA PRINCIPAL
         st.markdown(f"""
-        <div class="alarm-card">
-            <div class="alarm-header">
+        <div class="main-alarm-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <span class="alarm-code">{val_id}</span>
-                    <span style="font-size: 20px; font-weight: 600; color: #ffffff; margin-left: 12px;">{val_desc}</span>
+                    <span class="code-badge">{val_id}</span>
                 </div>
-                <div>{badge_disp}</div>
+                <div>
+                    {badge_html}
+                </div>
+            </div>
+            <div class="alarm-desc-text">
+                {val_desc}
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-        c1, c2, c3, c4 = st.columns(4)
-
-        with c1:
+        
+        # CUADRÍCULA DE DIAGNÓSTICO TÉCNICO (4 MÓDULOS)
+        m1, m2, m3, m4 = st.columns(4)
+        
+        with m1:
             st.markdown(f"""
-            <div class="prop-box" style="border-top: 3px solid #f59e0b;">
-                <div class="prop-title">🛑 Programa de Frenado ({val_brake})</div>
-                <div class="prop-value">{desc_brake}</div>
+            <div class="module-card" style="border-top: 3px solid #ef4444;">
+                <div class="module-label">🛑 Frenado (Brake)</div>
+                <div class="module-code">Código: {val_brake}</div>
+                <div class="module-meaning">{desc_brake}</div>
             </div>
             """, unsafe_allow_html=True)
 
-        with c2:
+        with m2:
             st.markdown(f"""
-            <div class="prop-box" style="border-top: 3px solid #3b82f6;">
-                <div class="prop-title">🔄 Orientación / Yaw ({val_yaw})</div>
-                <div class="prop-value">{desc_yaw}</div>
+            <div class="module-card" style="border-top: 3px solid #38bdf8;">
+                <div class="module-label">🔄 Orientación (Yaw)</div>
+                <div class="module-code">Código: {val_yaw}</div>
+                <div class="module-meaning">{desc_yaw}</div>
             </div>
             """, unsafe_allow_html=True)
 
-        with c3:
+        with m3:
             st.markdown(f"""
-            <div class="prop-box" style="border-top: 3px solid #10b981;">
-                <div class="prop-title">🔑 Modo Restablecimiento ({val_reset})</div>
-                <div class="prop-value">{desc_reset}</div>
+            <div class="module-card" style="border-top: 3px solid #10b981;">
+                <div class="module-label">🔑 Rearme (Reset Mode)</div>
+                <div class="module-code">Modo: {val_reset}</div>
+                <div class="module-meaning">{desc_reset}</div>
             </div>
             """, unsafe_allow_html=True)
 
-        with c4:
-            txt_statcom = "Habilitado durante parada" if val_statcom else "Inhibido por alarma"
-            color_statcom = "#10b981" if val_statcom else "#94a3b8"
+        with m4:
+            txt_stc = "Habilitado en parada" if es_statcom else "Inhibido por alarma"
             st.markdown(f"""
-            <div class="prop-box" style="border-top: 3px solid {color_statcom};">
-                <div class="prop-title">⚡ Suministro StatCom</div>
-                <div class="prop-value">{txt_statcom}</div>
+            <div class="module-card" style="border-top: 3px solid {'#10b981' if es_statcom else '#64748b'};">
+                <div class="module-label">⚡ Potencia Reactiva</div>
+                <div class="module-code">StatCom</div>
+                <div class="module-meaning">{txt_stc}</div>
             </div>
             """, unsafe_allow_html=True)
 
-        # Permisos y niveles
+        # Barra de permisos de seguridad
         st.markdown(f"""
-        <div style="background: #0f172a; padding: 12px 16px; border-radius: 8px; font-size: 13px; color: #94a3b8; border: 1px solid #1e293b;">
-            🛡️ <b>Nivel de usuario para Reset:</b> <span style="color:#e2e8f0;">{val_lvl_reset}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
-            🔒 <b>Nivel para Desactivación:</b> <span style="color:#e2e8f0;">{val_lvl_deact}</span>
+        <div style="background: #111827; border: 1px solid #1f2937; border-radius: 8px; padding: 12px 18px; margin-top: 15px; font-size: 13px; color: #94a3b8;">
+            🛡️ <b>Nivel de Usuario para Reset:</b> <span style="color: #f1f5f9;">{lvl_reset}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            🔒 <b>Nivel para Desactivación:</b> <span style="color: #f1f5f9;">{lvl_deact}</span>
         </div>
         """, unsafe_allow_html=True)
 
-# ------------------ PESTAÑA 2: TABLA COMPLETA ------------------
-with tab_catalogo:
-    st.dataframe(df_filtrado, use_container_width=True, hide_index=True)
-    csv = df_filtrado.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        "📥 Descargar registros filtrados (CSV)",
-        data=csv,
-        file_name="alarmas_inland_export.csv",
-        mime="text/csv"
-    )
+        # Desplegable con todos los campos en bruto (para auditoría técnica)
+        with st.expander("🔍 Ver todos los campos originales del archivo Excel"):
+            st.dataframe(resultado.drop(columns=["_CODIGO_KEY", "_CODIGO_LABEL"], errors="ignore"), use_container_width=True, hide_index=True)
 
-# ------------------ PESTAÑA 3: LEYENDA TÉCNICA ------------------
-with tab_leyenda:
-    col_l1, col_l2 = st.columns(2)
-    with col_l1:
-        st.markdown("#### 🔑 Modos de Restablecimiento (*Reset Mode*)")
+# -------------------------------------------------------------
+# PESTAÑA INFERIOR: LEYENDA OFICIAL
+# -------------------------------------------------------------
+with st.expander("📖 Consultar Leyenda Oficial de Códigos (Frenos, Yaw y Reset)"):
+    c_tab1, c_tab2 = st.columns(2)
+    with c_tab1:
+        st.markdown("##### 🔑 Modos de Restablecimiento (*Reset Mode*)")
         st.dataframe(pd.DataFrame(list(RESET_MODE_MAP.items()), columns=["Modo", "Significado"]), hide_index=True, use_container_width=True)
-        
-        st.markdown("#### 🔄 Programas de Orientación (*Yaw-Program*)")
+        st.markdown("##### 🔄 Programas de Orientación (*Yaw-Program*)")
         st.dataframe(pd.DataFrame(list(YAW_PROG_MAP.items()), columns=["Código", "Significado"]), hide_index=True, use_container_width=True)
-
-    with col_l2:
-        st.markdown("#### 🛑 Programas de Frenado (*Brake-Program*)")
+    with c_tab2:
+        st.markdown("##### 🛑 Programas de Frenado (*Brake-Program*)")
         st.dataframe(pd.DataFrame(list(BRAKE_PROG_MAP.items()), columns=["Código", "Significado"]), hide_index=True, use_container_width=True)
-        
-        st.markdown("""
-        #### ⚡ Propiedades Adicionales
-        * **StatCom:**
-          * `Yes`: Suministro de potencia reactiva posible durante la parada del aerogenerador.
-          * `No`: Suministro de potencia reactiva inhibido por la alarma.
-        * **Reduce Availability:**
-          * `Yes`: Afecta la disponibilidad técnica (turbina parada).
-          * `No`: La turbina continúa operando.
-        """)
