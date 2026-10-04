@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Diccionario de Alarmas | INLAND</title>
+  
+  <!-- Meta etiquetas para comportamiento de App Nativa en Celular -->
+  <meta name="theme-color" content="#0b111e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Alarmas WTG">
+  
+  <!-- Tailwind CSS & SheetJS (Lector de Excel en el navegador) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    /* Efectos táctiles y transiciones suaves */
+    body {
+      background-color: #0b111e;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .touch-btn:active {
+      transform: scale(0.96);
+      transition: transform 0.1s ease;
+    }
+    .glow-card {
+      box-shadow: 0 4px 25px -5px rgba(16, 185, 129, 0.15);
+    }
+    /* Animación de entrada suave para la ficha */
+    .fade-in {
+      animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-12 flex flex-col items-center">
+
+  <!-- CABECERA DE LA APP -->
+  <header class="w-full max-w-md px-5 pt-6 pb-4 sticky top-0 bg-[#0b111e]/90 backdrop-blur-md z-30 border-b border-slate-800/80">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white leading-tight">CENTRALES EÓLICAS</h1>
+          <p class="text-xs text-emerald-400 font-medium">Diccionario de Alarmas • INLAND</p>
+        </div>
+      </div>
+      <div id="statusDot" class="flex items-center space-x-1.5 text-[11px] bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 text-slate-400">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="statusTxt">Cargando...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="w-full max-w-md px-5 mt-4 flex-1">
+
+    <!-- BUSCADOR CON DISEÑO TÁCTIL -->
+    <div class="relative mt-2">
+      <label class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block mb-1.5 ml-1">Código de Falla</label>
+      <div class="relative flex items-center">
+        <input 
+          id="codigoInput" 
+          type="text" 
+          inputmode="text" 
+          placeholder="Escribe el código (ej. 51 o FM51)..." 
+          class="w-full bg-slate-900/90 text-white placeholder-slate-500 text-lg font-semibold px-4 py-3.5 pr-12 rounded-2xl border-2 border-slate-800 focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all"
+        />
+        <button id="clearBtn" class="absolute right-3.5 text-slate-500 hover:text-white hidden p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- BOTONES RÁPIDOS PARA EL PULGAR -->
+    <div class="mt-3.5 flex items-center space-x-2 overflow-x-auto pb-1 text-xs">
+      <span class="text-slate-500 text-[11px] font-medium whitespace-nowrap pl-1">Frecuentes:</span>
+      <button onclick="buscarCodigo('0')" class="touch-btn bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 whitespace-nowrap">FM0</button>
+      <button onclick="buscarCodigo('50')" class="touch-btn bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 whitespace-nowrap">FM50</button>
+      <button onclick="buscarCodigo('51')" class="touch-btn bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 whitespace-nowrap">FM51</button>
+      <button onclick="buscarCodigo('52')" class="touch-btn bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 whitespace-nowrap">FM52</button>
+      <button onclick="buscarCodigo('1001')" class="touch-btn bg-slate-800/80 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700/60 whitespace-nowrap">FM1001</button>
+    </div>
+
+    <!-- ESTADO INICIAL / PLACEHOLDER -->
+    <div id="emptyState" class="mt-12 text-center px-4">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      </div>
+      <p class="text-sm font-medium text-slate-400">Ingresa un código numérico para diagnosticar</p>
+      <p class="text-xs text-slate-600 mt-1">El sistema decodificará automáticamente los programas de frenado, orientación y modo de reset.</p>
+    </div>
+
+    <!-- ESTADO NO ENCONTRADO -->
+    <div id="notFoundState" class="mt-8 text-center p-6 bg-red-950/20 border border-red-900/40 rounded-2xl hidden">
+      <p class="text-sm font-semibold text-red-400">Código no encontrado</p>
+      <p class="text-xs text-slate-400 mt-1">Verifica si el número ingresado corresponde al catálogo de la turbina.</p>
+    </div>
+
+    <!-- TARJETA DE ALARMA (RESULTADO DINÁMICO) -->
+    <div id="resultCard" class="mt-5 hidden fade-in">
+      
+      <!-- ENCABEZADO DE ALARMA -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 glow-card">
+        
+        <!-- Badge de Código + Semáforo de Disponibilidad -->
+        <div class="flex items-start justify-between gap-3 mb-3">
+          <div class="inline-flex items-center px-3.5 py-1.5 rounded-xl bg-sky-950/80 border border-sky-800/80 text-sky-400 font-mono font-bold text-lg tracking-wider">
+            <span id="alarmCode">FM--</span>
+          </div>
+          <div id="statusBadge" class="text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+            <!-- Rellenado por JS -->
+          </div>
+        </div>
+
+        <!-- Descripción Completa -->
+        <div class="mt-3">
+          <h2 class="text-xs uppercase font-bold tracking-wider text-slate-500 mb-1">Descripción del Evento</h2>
+          <p id="alarmDesc" class="text-base font-medium text-slate-100 leading-snug"></p>
+        </div>
+
+        <!-- LÍNEA SEPARADORA -->
+        <hr class="border-slate-800/80 my-4">
+
+        <!-- PARÁMETROS EN GRID (2x2) -->
+        <div class="grid grid-cols-2 gap-2.5">
+          
+          <!-- Frenado -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/60">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1">
+              <span>🛑 Frenado</span>
+            </div>
+            <div id="brakeVal" class="text-sm font-bold text-white mt-0.5">Prog: -</div>
+            <div id="brakeText" class="text-xs text-slate-400 mt-0.5 leading-tight">--</div>
+          </div>
+
+          <!-- Orientación / Yaw -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/60">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-sky-400 flex items-center gap-1">
+              <span>🔄 Orientación</span>
+            </div>
+            <div id="yawVal" class="text-sm font-bold text-white mt-0.5">Prog: -</div>
+            <div id="yawText" class="text-xs text-slate-400 mt-0.5 leading-tight">--</div>
+          </div>
+
+          <!-- Modo Reset -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/60">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+              <span>🔑 Modo Reset</span>
+            </div>
+            <div id="resetVal" class="text-sm font-bold text-white mt-0.5">Modo: -</div>
+            <div id="resetText" class="text-xs text-slate-400 mt-0.5 leading-tight">--</div>
+          </div>
+
+          <!-- StatCom -->
+          <div class="bg-slate-950/70 p-3 rounded-xl border border-slate-800/60">
+            <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
+              <span>⚡ StatCom</span>
+            </div>
+            <div id="statcomVal" class="text-sm font-bold text-white mt-0.5">--</div>
+            <div id="statcomText" class="text-xs text-slate-400 mt-0.5 leading-tight">--</div>
+          </div>
+
+        </div>
+
+        <!-- FOOTER: NIVELES DE SEGURIDAD -->
+        <div class="mt-3.5 bg-slate-950/40 p-2.5 rounded-xl border border-slate-800/40 text-[11px] text-slate-400 flex justify-between items-center">
+          <div><span class="text-slate-500 font-medium">Nivel Reset:</span> <strong id="lvlReset" class="text-slate-200">-</strong></div>
+          <div><span class="text-slate-500 font-medium">Nivel Desact:</span> <strong id="lvlDeact" class="text-slate-200">-</strong></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- LÓGICA DE LA APLICACIÓN -->
+  <script>
+    // Diccionarios Oficiales
+    const RESET_MAP = {
+      "-": "Sin modo de restablecimiento",
+      "A": "Restablecimiento automático de alarma",
+      "M": "Se requiere restablecimiento manual",
+      "M(A)": "Restablecimiento manual (Automático por ARS)",
+      "ML": "Reinicio manual en turbina por operador",
+      "SL": "Reinicio local de seguridad requerido",
+      "SR": "Reinicio remoto de seguridad (Solo K08Delta)"
+    };
+
+    const BRAKE_MAP = {
+      0: "Sin frenado",
+      1: "Frenado suave",
+      2: "Frenado rápido",
+      3: "Frenado rápido con parada de rotor",
+      5: "Frenado suave con giro libre rápido (fast idling)",
+      6: "Frenado rápido con giro libre rápido (fast idling)"
+    };
+
+    const YAW_MAP = {
+      0: "Modo automático",
+      10: "Evitación de sector (Sector Avoidance)",
+      20: "Modo económico",
+      24: "Modo automático a 90°",
+      25: "Modo automático bloqueado",
+      28: "Destorsión / desenrollado de cables",
+      29: "Posición de estacionamiento (Parking)",
+      30: "Modo manual",
+      33: "Modo manual: posición objetivo",
+      35: "Modo manual: panel de operador",
+      46: "Prueba de frenos",
+      47: "Prueba del encoder del motor",
+      48: "Prueba de ejes",
+      50: "Parada de orientación (Yaw Stop)",
+      55: "Parada de orientación y desconexión"
+    };
+
+    let baseDatos = [];
+
+    // Cargar el archivo Excel automáticamente
+    async function cargarExcel() {
+      try {
+        const response = await fetch('alarmas_inland.xlsx');
+        if (!response.ok) throw new Error("No se pudo cargar el archivo");
+        const data = await response.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { defval: "" });
+        
+        baseDatos = normalizarDatos(json);
+        document.getElementById('statusDot').innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="text-emerald-400 font-semibold">${baseDatos.length} Alarmas</span>
+        `;
+      } catch (err) {
+        console.warn("Usando datos de prueba locales", err);
+        baseDatos = [
+          { codigo: "0", desc: "WTG System ok", reset: "-", brake: 0, yaw: 0, statcom: "Yes", disp: "No", lvlR: "-", lvlD: "-" },
+          { codigo: "50", desc: "Cadena de seguridad parada de emergencia general", reset: "SL", brake: 3, yaw: 50, statcom: "No", disp: "Yes", lvlR: "Operador", lvlD: "Nivel 2" },
+          { codigo: "51", desc: "Cadena de seguridad activada a través del interruptor Bottombox", reset: "ML", brake: 3, yaw: 50, statcom: "No", disp: "Yes", lvlR: "Nivel 2", lvlD: "Nivel 3" },
+          { codigo: "1001", desc: "Sobrevelocidad de rotor", reset: "SL", brake: 3, yaw: 29, statcom: "No", disp: "Yes", lvlR: "Nivel 3", lvlD: "Nivel 4" }
+        ];
+        document.getElementById('statusDot').innerHTML = `
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="text-emerald-400 font-semibold">${baseDatos.length} Alarmas</span>
+        `;
+      }
+    }
+
+    function normalizarDatos(filas) {
+      return filas.map(f => {
+        const claves = Object.keys(f);
+        const getVal = (terms) => {
+          for (let k of claves) {
+            if (terms.some(t => k.toLowerCase().includes(t))) return String(f[k]).trim();
+          }
+          return "";
+        };
+
+        const rawCode = getVal(["fm", "codigo", "code", "alarm"]) || String(f[claves[0]]).trim();
+        const cleanCode = rawCode.toUpperCase().replace(/\s+/g, '').replace(/^FM/, '');
+
+        return {
+          codigoRaw: rawCode,
+          codigoKey: cleanCode,
+          desc: getVal(["descrip", "message", "mensaje", "texto"]) || "Sin descripción",
+          reset: getVal(["reset mode", "resetmode", "modo reset"]) || "-",
+          brake: getVal(["brake", "freno"]) || "0",
+          yaw: getVal(["yaw", "orienta"]) || "0",
+          statcom: getVal(["statcom", "reactiv"]) || "No",
+          disp: getVal(["availab", "disponib"]) || "No",
+          lvlR: getVal(["reset level", "nivel reset"]) || "No especificado",
+          lvlD: getVal(["deact", "desactiv"]) || "No especificado"
+        };
+      });
+    }
+
+    // Buscador interactivo
+    const input = document.getElementById('codigoInput');
+    const clearBtn = document.getElementById('clearBtn');
+    const emptyState = document.getElementById('emptyState');
+    const notFoundState = document.getElementById('notFoundState');
+    const resultCard = document.getElementById('resultCard');
+
+    function buscarCodigo(valor) {
+      input.value = valor;
+      procesarBusqueda();
+    }
+
+    function procesarBusqueda() {
+      const query = input.value.trim().toUpperCase().replace(/\s+/g, '').replace(/^FM/, '');
+      clearBtn.classList.toggle('hidden', input.value.trim() === '');
+
+      if (!query) {
+        emptyState.classList.remove('hidden');
+        notFoundState.classList.add('hidden');
+        resultCard.classList.add('hidden');
+        return;
+      }
+
+      const match = baseDatos.find(item => item.codigoKey === query);
+
+      if (match) {
+        emptyState.classList.add('hidden');
+        notFoundState.classList.add('hidden');
+        renderAlarma(match);
+      } else {
+        emptyState.classList.add('hidden');
+        notFoundState.classList.remove('hidden');
+        resultCard.classList.add('hidden');
+      }
+    }
+
+    function renderAlarma(a) {
+      document.getElementById('alarmCode').textContent = a.codigoRaw.startsWith('FM') ? a.codigoRaw : `FM${a.codigoRaw}`;
+      document.getElementById('alarmDesc').textContent = a.desc;
+
+      // Disponibilidad
+      const isTrip = ["YES", "SÍ", "SI", "TRUE", "1"].includes(a.disp.toUpperCase());
+      const statusBadge = document.getElementById('statusBadge');
+      if (isTrip) {
+        statusBadge.className = "text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 bg-red-950/80 border border-red-800 text-red-400";
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> PARADA FORZADA`;
+      } else {
+        statusBadge.className = "text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 bg-emerald-950/80 border border-emerald-800 text-emerald-400";
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> TURBINA OPERATIVA`;
+      }
+
+      // Frenado
+      const bInt = parseInt(a.brake);
+      document.getElementById('brakeVal').textContent = `Código: ${a.brake}`;
+      document.getElementById('brakeText').textContent = BRAKE_MAP[bInt] || "Estándar";
+
+      // Yaw
+      const yInt = parseInt(a.yaw);
+      document.getElementById('yawVal').textContent = `Código: ${a.yaw}`;
+      document.getElementById('yawText').textContent = YAW_MAP[yInt] || "Estándar";
+
+      // Reset
+      document.getElementById('resetVal').textContent = `Modo: ${a.reset}`;
+      document.getElementById('resetText').textContent = RESET_MAP[a.reset] || a.reset;
+
+      // StatCom
+      const isStc = ["YES", "SÍ", "SI"].includes(a.statcom.toUpperCase());
+      document.getElementById('statcomVal').textContent = isStc ? "Habilitado" : "Inhibido";
+      document.getElementById('statcomText').textContent = isStc ? "Suministro reactivo activo en parada" : "Inhibido por alarma";
+
+      // Niveles
+      document.getElementById('lvlReset').textContent = a.lvlR;
+      document.getElementById('lvlDeact').textContent = a.lvlD;
+
+      resultCard.classList.remove('hidden');
+    }
+
+    input.addEventListener('input', procesarBusqueda);
+    clearBtn.addEventListener('click', () => {
+      input.value = '';
+      procesarBusqueda();
+      input.focus();
+    });
+
+    cargarExcel();
+  </script>
+</body>
+</html>
