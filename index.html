@@ -3,15 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Diccionario Eólico de Alarmas | INLAND</title>
+  <title>Diccionario de Alarmas | INLAND</title>
   
-  <!-- Configuración de App Nativa en Celular -->
   <meta name="theme-color" content="#0b111e">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Alarmas WTG">
   
-  <!-- Tailwind CSS & Lector Excel SheetJS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -19,7 +16,7 @@
     body {
       background-color: #0b111e;
       color: #f1f5f9;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
@@ -54,7 +51,7 @@
       </div>
       <div id="statusDot" class="flex items-center space-x-1.5 text-[11px] bg-slate-900 px-2.5 py-1 rounded-full border border-slate-800 text-slate-400">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-        <span>Cargando...</span>
+        <span>Cargando BD...</span>
       </div>
     </div>
   </header>
@@ -62,7 +59,7 @@
   <!-- CONTENEDOR PRINCIPAL -->
   <main class="w-full max-w-lg px-4 mt-3 flex-1">
 
-    <!-- BARRA DE BÚSQUEDA TÁCTIL DIRECTA -->
+    <!-- BUSCADOR DIRECTO -->
     <div class="relative">
       <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1 ml-1">Escriba el Código de Falla:</label>
       <div class="relative flex items-center">
@@ -78,13 +75,14 @@
       </div>
     </div>
 
-    <!-- BOTONES DE ACCESO RÁPIDO -->
+    <!-- ACCESOS RÁPIDOS -->
     <div class="mt-2.5 flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs">
       <span class="text-slate-500 text-[10px] font-semibold whitespace-nowrap pl-1">Pruebas:</span>
       <button onclick="buscar('99')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM99</button>
       <button onclick="buscar('51')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM51</button>
       <button onclick="buscar('58')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM58</button>
-      <button onclick="buscar('104')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM104</button>
+      <button onclick="buscar('10')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM10</button>
+      <button onclick="buscar('0')" class="touch-btn bg-slate-800/90 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-700 text-xs font-mono font-medium">FM0</button>
     </div>
 
     <!-- ESTADO VACÍO -->
@@ -93,83 +91,85 @@
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </div>
       <p class="text-sm font-semibold text-slate-400">Ingrese un código para diagnosticar</p>
-      <p class="text-xs text-slate-600 mt-1">Escriba el número directamente para ver la descripción y sus 6 parámetros técnicos.</p>
+      <p class="text-xs text-slate-600 mt-1">Escriba el número directamente para ver la identidad y sus 6 parámetros técnicos.</p>
     </div>
 
     <!-- ESTADO NO ENCONTRADO -->
     <div id="notFoundState" class="mt-8 text-center p-5 bg-red-950/20 border border-red-900/40 rounded-xl hidden">
       <p class="text-sm font-semibold text-red-400">Código no encontrado</p>
-      <p class="text-xs text-slate-400 mt-1">No existe registro en la base de datos para ese código.</p>
+      <p class="text-xs text-slate-400 mt-1">No existe ninguna falla con ese número en la matriz SCADA.</p>
     </div>
 
-    <!-- FICHA Y LAS 6 TARJETAS (RESULTADO) -->
+    <!-- RESULTADO DINÁMICO -->
     <div id="resultCard" class="mt-4 hidden fade-in space-y-3">
       
-      <!-- 1. BLOQUE PRINCIPAL (HOJA 1: Lista_alarmas) -->
+      <!-- 1. IDENTIDAD DE LA FALLA -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl">
-        <div class="flex items-center justify-between mb-2">
-          <span id="alarmCode" class="font-mono text-xl font-black text-sky-400 bg-sky-950/80 border border-sky-800 px-3 py-1 rounded-lg">FM99</span>
-          <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Identidad de Falla</span>
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2">
+            <span id="alarmCode" class="font-mono text-xl font-black text-sky-400 bg-sky-950/80 border border-sky-800 px-3 py-1 rounded-lg">FM--</span>
+            <span id="alarmSubsystem" class="text-xs font-bold text-amber-400 bg-amber-950/80 border border-amber-800/80 px-2 py-1 rounded-md uppercase">--</span>
+          </div>
+          <div id="statusBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5">
+            <!-- Badge de parada o disponible -->
+          </div>
         </div>
         
-        <!-- Título de la Falla -->
-        <h2 id="alarmTitle" class="text-base font-bold text-white leading-snug mt-2">--</h2>
+        <!-- Título -->
+        <h2 id="alarmTitle" class="text-base font-bold text-white leading-snug mt-1.5">--</h2>
         
-        <!-- Descripción de la Falla -->
+        <!-- Descripción -->
         <div class="mt-2.5 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs text-slate-300 leading-relaxed font-normal" id="alarmDesc">
           --
         </div>
       </div>
 
-      <!-- 2. LAS 6 TARJETAS TÉCNICAS (HOJA 2: Matriz_Ingenieria_SCADA) -->
+      <!-- 2. LAS 6 TARJETAS TÉCNICAS (MATRIZ SCADA) -->
       <div>
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Parámetros Operativos (SCADA)</p>
+        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2 ml-1">Parámetros Operativos (Matriz SCADA)</p>
         
         <div class="grid grid-cols-2 gap-2.5">
           
-          <!-- TARJETA 1: AFECTA DISPONIBILIDAD -->
+          <!-- 1. Disponibilidad -->
           <div id="cardDisp" class="p-3 rounded-xl border flex flex-col justify-between">
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">1. Disponibilidad</span>
             <div id="valDisp" class="text-lg font-black my-0.5">--</div>
             <div id="descDisp" class="text-[11px] leading-tight">--</div>
           </div>
 
-          <!-- TARJETA 2: MODO RESET -->
+          <!-- 2. Modo Reset -->
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
             <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400">2. Modo Reset</span>
             <div id="valReset" class="text-lg font-black text-white font-mono my-0.5">--</div>
             <div id="descReset" class="text-[11px] text-slate-400 leading-tight">--</div>
           </div>
 
-          <!-- TARJETA 3: PROGRAMA DE FRENADO -->
+          <!-- 3. Programa Frenado -->
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">3. Prog. Frenado</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400">3. Prog. Frenado (BP)</span>
             <div id="valBrake" class="text-lg font-black text-white font-mono my-0.5">--</div>
             <div id="descBrake" class="text-[11px] text-slate-400 leading-tight">--</div>
           </div>
 
-          <!-- TARJETA 4: PROGRAMA YAW / ORIENTACIÓN -->
+          <!-- 4. Programa Yaw -->
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">4. Prog. Orientación (Yaw)</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400">4. Prog. Yaw (YP)</span>
             <div id="valYaw" class="text-lg font-black text-white font-mono my-0.5">--</div>
             <div id="descYaw" class="text-[11px] text-slate-400 leading-tight">--</div>
           </div>
 
-          <!-- TARJETA 5: STATCOM (REACTIVA) -->
+          <!-- 5. StatCom -->
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">5. StatCom (Reactiva)</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400">5. StatCom Activo</span>
             <div id="valStatcom" class="text-lg font-black text-white font-mono my-0.5">--</div>
             <div id="descStatcom" class="text-[11px] text-slate-400 leading-tight">--</div>
           </div>
 
-          <!-- TARJETA 6: NIVELES DE USUARIO -->
+          <!-- 6. Nivel Reset -->
           <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 flex flex-col justify-between">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400">6. Niveles de Acceso</span>
-            <div class="text-xs text-slate-300 font-medium my-0.5 space-y-0.5">
-              <div>Reset: <strong id="valLvlReset" class="text-white font-semibold">-</strong></div>
-              <div>Desact: <strong id="valLvlDeact" class="text-white font-semibold">-</strong></div>
-            </div>
-            <div class="text-[10px] text-slate-500">Nivel de autorización</div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-purple-400">6. Nivel Reset</span>
+            <div id="valLvlReset" class="text-lg font-black text-white font-mono my-0.5">--</div>
+            <div id="descLvlReset" class="text-[11px] text-slate-400 leading-tight">--</div>
           </div>
 
         </div>
@@ -179,26 +179,23 @@
 
   </main>
 
-  <!-- LÓGICA DE PROCESAMIENTO Y CRUCE DE HOJAS -->
   <script>
-    // -------------------------------------------------------------
-    // DICCIONARIOS OFICIALES (DE LA HOJA 3: Leyenda_datos)
-    // -------------------------------------------------------------
+    // DICCIONARIOS DE DECODIFICACIÓN TÉCNICA
     const RESET_MAP = {
       "-": "Sin modo de restablecimiento",
-      "A": "Restablecimiento automático de la alarma",
+      "A": "Restablecimiento automático de alarma",
       "M": "Se requiere restablecimiento manual",
       "M(A)": "Restablecimiento manual (Automático por ARS)",
-      "ML": "Se requiere restablecimiento manual por el operador localmente en el aerogenerador",
-      "SL": "Se requiere restablecimiento local de la alarma de seguridad",
-      "SR": "Restablecimiento remoto de la alarma de seguridad (Solo K08Delta)"
+      "ML": "Reinicio manual en turbina por operador",
+      "SL": "Reinicio local de seguridad requerido",
+      "SR": "Reinicio remoto de seguridad (Solo K08Delta)"
     };
 
     const BRAKE_MAP = {
       0: "Sin frenado",
       1: "Frenado suave",
       2: "Frenado rápido",
-      3: "Frenado rápido con parada del rotor",
+      3: "Frenado rápido con parada de rotor",
       5: "Frenado suave con giro libre rápido (fast idling)",
       6: "Frenado rápido con giro libre rápido (fast idling)"
     };
@@ -210,145 +207,79 @@
       24: "Modo automático a 90°",
       25: "Modo automático bloqueado",
       28: "Destorsión / desenrollado de cables",
-      29: "Posición de parada / estacionamiento (Parking)",
+      29: "Posición de estacionamiento (Parking)",
       30: "Modo manual",
       33: "Modo manual: posición objetivo",
       35: "Modo manual: panel de operador",
       46: "Prueba de frenos",
-      47: "Prueba del codificador (encoder) del motor",
+      47: "Prueba del encoder del motor",
       48: "Prueba de ejes",
       50: "Parada de orientación (Yaw Stop)",
-      55: "Parada de orientación y desconexión / apagado"
+      55: "Parada de orientación y desconexión"
     };
 
-    // Estructuras en memoria
-    let dbAlarmas = {}; // Mapeado por código normalizado (ej. "99")
+    let baseAlarmas = {};
 
-    function normalizarKey(val) {
+    function cleanKey(val) {
       if (!val) return "";
       return String(val).trim().toUpperCase().replace(/\s+/g, '').replace(/^FM/, '');
     }
 
-    // Carga de Excel multi-hoja
-    async function cargarExcelMultiHoja() {
+    // Carga de Excel apuntando directo a la hoja 2 (Matriz_Ingenieria_SCADA)
+    async function cargarExcel() {
       try {
         const response = await fetch('alarmas_inland.xlsx');
         if (!response.ok) throw new Error("Archivo no accesible");
         const buffer = await response.arrayBuffer();
         const wb = XLSX.read(buffer, { type: 'array' });
 
-        // Identificar hojas por nombre
-        const sheetNombres = wb.SheetNames;
-        const nombreHoja1 = sheetNombres.find(n => n.toLowerCase().includes('lista')) || sheetNombres[0];
-        const nombreHoja2 = sheetNombres.find(n => n.toLowerCase().includes('matriz') || n.toLowerCase().includes('scada')) || sheetNombres[1] || sheetNombres[0];
+        // Buscar específicamente la hoja Matriz_Ingenieria_SCADA
+        let sheetName = wb.SheetNames.find(s => s.toLowerCase().includes('scada') || s.toLowerCase().includes('matriz'));
+        if (!sheetName) sheetName = wb.SheetNames[1] || wb.SheetNames[0];
 
-        const jsonHoja1 = XLSX.utils.sheet_to_json(wb.Sheets[nombreHoja1], { defval: "" });
-        const jsonHoja2 = XLSX.utils.sheet_to_json(wb.Sheets[nombreHoja2], { defval: "" });
+        const json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: "" });
+        
+        baseAlarmas = {};
+        json.forEach(row => {
+          // Búsqueda insensible a mayúsculas/espacios para cada encabezado
+          const keys = Object.keys(row);
+          const getVal = (colName) => {
+            const foundKey = keys.find(k => k.trim().toLowerCase() === colName.toLowerCase());
+            return foundKey ? String(row[foundKey]).trim() : "";
+          };
 
-        procesarDatos(jsonHoja1, jsonHoja2);
+          const rawCode = getVal("Codigo de Falla");
+          const key = cleanKey(rawCode);
+          if (!key) return;
 
-        const total = Object.keys(dbAlarmas).length;
+          baseAlarmas[key] = {
+            code: rawCode.startsWith("FM") ? rawCode : `FM${rawCode}`,
+            subsistema: getVal("Subsistema") || "WTG",
+            titulo: getVal("Titulo de la Falla") || "Sin título",
+            desc: getVal("Descripcion de Falla (ES)") || getVal("Descripcion de Falla") || "Sin descripción",
+            afectaDisp: getVal("Afecta Disponibilidad") || "No",
+            modoReset: getVal("Modo Reset") || "-",
+            progFreno: getVal("Prog. Freno (BP)") || "0",
+            progYaw: getVal("Prog. Yaw (YP)") || "0",
+            statcom: getVal("StatCom Activo") || "No",
+            nivelReset: getVal("Nivel Reset") || "0"
+          };
+        });
+
+        const total = Object.keys(baseAlarmas).length;
         document.getElementById('statusDot').innerHTML = `
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span class="text-emerald-400 font-semibold">${total} Alarmas</span>
         `;
-      } catch (e) {
-        console.warn("Cargando datos demostrativos para FM99", e);
-        // Fallback demostrativo con FM99 exacto
-        dbAlarmas = {
-          "99": {
-            codigoOriginal: "FM99",
-            titulo: "HMI SIS Manual start req. after SIS alarm",
-            descripcion: "La alarma se genera cuando el sistema de seguridad activa una alarma de parada de reinicio (SIS). Se requiere un reinicio manual.",
-            disponibilidad: "Si",
-            modoReset: "M",
-            brake: "3",
-            yaw: "50",
-            statcom: "No",
-            lvlReset: "Operador",
-            lvlDeact: "Nivel 2"
-          }
-        };
+      } catch (err) {
+        console.error("Error al leer Excel:", err);
         document.getElementById('statusDot').innerHTML = `
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="text-emerald-400 font-semibold">1 Alarma</span>
+          <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+          <span class="text-rose-400 font-semibold">Error BD</span>
         `;
       }
     }
 
-    function procesarDatos(hoja1, hoja2) {
-      dbAlarmas = {};
-
-      // 1. Procesar Hoja 1: Lista_alarmas (Identidad: Código, Título, Descripción)
-      hoja1.forEach(fila => {
-        const claves = Object.keys(fila);
-        const colCod = claves.find(k => k.toLowerCase().includes('codigo') || k.toLowerCase().includes('código') || k.toLowerCase().includes('fm')) || claves[0];
-        const colTit = claves.find(k => k.toLowerCase().includes('titulo') || k.toLowerCase().includes('título')) || claves[1];
-        const colDesc = claves.find(k => k.toLowerCase().includes('descrip')) || claves[2];
-
-        const rawCode = String(fila[colCod]).trim();
-        const key = normalizarKey(rawCode);
-        if (!key) return;
-
-        const titulo = String(fila[colTit]).trim();
-        const desc = String(fila[colDesc]).trim();
-
-        if (!dbAlarmas[key]) {
-          dbAlarmas[key] = {
-            codigoOriginal: rawCode.startsWith('FM') ? rawCode : `FM${rawCode}`,
-            titulo: titulo,
-            descripcion: desc,
-            disponibilidad: "No",
-            modoReset: "-",
-            brake: "0",
-            yaw: "0",
-            statcom: "No",
-            lvlReset: "-",
-            lvlDeact: "-"
-          };
-        } else {
-          // Si hay varias filas para el mismo código, completar textos
-          if (titulo && !dbAlarmas[key].titulo.includes(titulo)) dbAlarmas[key].titulo += " / " + titulo;
-          if (desc && !dbAlarmas[key].descripcion.includes(desc)) dbAlarmas[key].descripcion += " " + desc;
-        }
-      });
-
-      // 2. Procesar Hoja 2: Matriz_Ingenieria_SCADA (Los 6 parámetros)
-      hoja2.forEach(fila => {
-        const claves = Object.keys(fila);
-        const colCod = claves.find(k => k.toLowerCase().includes('codigo') || k.toLowerCase().includes('código') || k.toLowerCase().includes('fm')) || claves[0];
-        
-        const rawCode = String(fila[colCod]).trim();
-        const key = normalizarKey(rawCode);
-        if (!key) return;
-
-        // Si no existía en Hoja 1, crear el objeto base
-        if (!dbAlarmas[key]) {
-          dbAlarmas[key] = {
-            codigoOriginal: rawCode.startsWith('FM') ? rawCode : `FM${rawCode}`,
-            titulo: "Falla registrada en Matriz SCADA",
-            descripcion: "Consulte los parámetros técnicos en las tarjetas inferiores."
-          };
-        }
-
-        const buscarVal = (terminos) => {
-          for (let k of claves) {
-            if (terminos.some(t => k.toLowerCase().trim().includes(t))) return String(fila[k]).trim();
-          }
-          return "";
-        };
-
-        dbAlarmas[key].disponibilidad = buscarVal(["reduce", "disponib", "availab", "afecta"]) || "No";
-        dbAlarmas[key].modoReset = buscarVal(["reset mode", "modo reset", "reset_mode", "resetmode"]) || "-";
-        dbAlarmas[key].brake = buscarVal(["brake", "freno"]) || "0";
-        dbAlarmas[key].yaw = buscarVal(["yaw", "orienta"]) || "0";
-        dbAlarmas[key].statcom = buscarVal(["statcom", "reactiv"]) || "No";
-        dbAlarmas[key].lvlReset = buscarVal(["reset level", "nivel reset"]) || "Operador";
-        dbAlarmas[key].lvlDeact = buscarVal(["deactiv", "desactiv"]) || "Nivel 2";
-      });
-    }
-
-    // Buscador interactivo
     const input = document.getElementById('codigoInput');
     const clearBtn = document.getElementById('clearBtn');
     const emptyState = document.getElementById('emptyState');
@@ -361,7 +292,7 @@
     }
 
     function ejecutarBusqueda() {
-      const q = normalizarKey(input.value);
+      const q = cleanKey(input.value);
       clearBtn.classList.toggle('hidden', input.value.trim() === '');
 
       if (!q) {
@@ -371,12 +302,12 @@
         return;
       }
 
-      const match = dbAlarmas[q];
+      const a = baseAlarmas[q];
 
-      if (match) {
+      if (a) {
         emptyState.classList.add('hidden');
         notFoundState.classList.add('hidden');
-        mostrarFicha(match);
+        renderFicha(a);
       } else {
         emptyState.classList.add('hidden');
         notFoundState.classList.remove('hidden');
@@ -384,53 +315,56 @@
       }
     }
 
-    function mostrarFicha(a) {
-      // Hoja 1: Datos de Identidad
-      document.getElementById('alarmCode').textContent = a.codigoOriginal;
-      document.getElementById('alarmTitle').textContent = a.titulo || "Sin título especificado";
-      document.getElementById('alarmDesc').textContent = a.descripcion || "Sin descripción provista.";
-
-      // Hoja 2: Los 6 parámetros técnicos
+    function renderFicha(a) {
+      document.getElementById('alarmCode').textContent = a.code;
+      document.getElementById('alarmSubsystem').textContent = a.subsistema;
+      document.getElementById('alarmTitle').textContent = a.titulo;
+      document.getElementById('alarmDesc').textContent = a.desc;
 
       // 1. Disponibilidad
-      const isTrip = ["YES", "SÍ", "SI", "TRUE", "1"].includes(String(a.disponibilidad).toUpperCase());
+      const isTrip = ["SÍ", "SI", "YES", "1"].includes(a.afectaDisp.toUpperCase());
       const cardDisp = document.getElementById('cardDisp');
       const valDisp = document.getElementById('valDisp');
       const descDisp = document.getElementById('descDisp');
+      const statusBadge = document.getElementById('statusBadge');
 
       if (isTrip) {
         cardDisp.className = "p-3 rounded-xl border flex flex-col justify-between bg-red-950/40 border-red-800 text-red-400";
         valDisp.textContent = "SÍ (Parada)";
-        descDisp.textContent = "Reduce la disponibilidad del aerogenerador";
+        descDisp.textContent = "Reduce disponibilidad de turbina";
+        statusBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 bg-red-950 border border-red-800 text-red-400";
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> PARADA`;
       } else {
         cardDisp.className = "p-3 rounded-xl border flex flex-col justify-between bg-emerald-950/40 border-emerald-800 text-emerald-400";
         valDisp.textContent = "NO";
-        descDisp.textContent = "No reduce la disponibilidad técnica";
+        descDisp.textContent = "Turbina permanece operativa";
+        statusBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5 bg-emerald-950 border border-emerald-800 text-emerald-400";
+        statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> OPERATIVA`;
       }
 
       // 2. Modo Reset
-      const rKey = a.modoReset.toUpperCase();
       document.getElementById('valReset').textContent = a.modoReset;
-      document.getElementById('descReset').textContent = RESET_MAP[rKey] || RESET_MAP[a.modoReset] || "Restablecimiento estándar";
+      document.getElementById('descReset').textContent = RESET_MAP[a.modoReset] || "Restablecimiento estándar";
 
-      // 3. Brake
-      const bInt = parseInt(a.brake);
-      document.getElementById('valBrake').textContent = `Código ${a.brake}`;
-      document.getElementById('descBrake').textContent = BRAKE_MAP[bInt] || "Programa estándar";
+      // 3. Freno
+      const bInt = parseInt(a.progFreno);
+      document.getElementById('valBrake').textContent = `Código ${a.progFreno}`;
+      document.getElementById('descBrake').textContent = BRAKE_MAP[bInt] || "Estándar";
 
       // 4. Yaw
-      const yInt = parseInt(a.yaw);
-      document.getElementById('valYaw').textContent = `Código ${a.yaw}`;
-      document.getElementById('descYaw').textContent = YAW_MAP[yInt] || "Programa estándar";
+      const yInt = parseInt(a.progYaw);
+      document.getElementById('valYaw').textContent = `Código ${a.progYaw}`;
+      document.getElementById('descYaw').textContent = YAW_MAP[yInt] || "Estándar";
 
       // 5. StatCom
-      const isStc = ["YES", "SÍ", "SI", "TRUE"].includes(String(a.statcom).toUpperCase());
-      document.getElementById('valStatcom').textContent = isStc ? "Sí" : "No";
-      document.getElementById('descStatcom').textContent = isStc ? "Reactiva permitida en parada" : "Inhibido por alarma";
+      const isStc = ["SÍ", "SI", "YES"].includes(a.statcom.toUpperCase());
+      document.getElementById('valStatcom').textContent = a.statcom;
+      document.getElementById('descStatcom').textContent = isStc ? "Permitido durante parada de WT" : "Inhibido por alarma";
 
-      // 6. Niveles
-      document.getElementById('valLvlReset').textContent = a.lvlReset || "-";
-      document.getElementById('valLvlDeact').textContent = a.lvlDeact || "-";
+      // 6. Nivel Reset
+      const lvl = a.nivelReset;
+      document.getElementById('valLvlReset').textContent = `Nivel ${lvl}`;
+      document.getElementById('descLvlReset').textContent = (lvl === "0" || lvl === "-") ? "Nivel Operador / Básico" : `Requiere autorización Nivel ${lvl}`;
 
       resultCard.classList.remove('hidden');
     }
@@ -442,7 +376,7 @@
       input.focus();
     });
 
-    cargarExcelMultiHoja();
+    cargarExcel();
   </script>
 </body>
 </html>
